@@ -1,0 +1,1 @@
+Stock Predictor uses machine learning models to predict stock prices.
