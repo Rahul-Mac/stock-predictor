@@ -39,6 +39,8 @@ class stock_predictor(QtWidgets.QMainWindow):
         self.setWindowIcon(QtGui.QIcon('icon.ico'))
         self.show()
 
+    # This function is used to set texts
+    # for window, buttons, and status bar
     def names(self):
         self.setWindowTitle("Stock Predictor")
         self.statusBar().showMessage("Welcome to Stock Predictor v1.0.0")
@@ -47,6 +49,7 @@ class stock_predictor(QtWidgets.QMainWindow):
         self.knn_btn.setText("k-Nearest\nNeighbors")
         self.svm_btn.setText("Sprt. Vector\nMachine")
 
+    # Connects button click to function
     def connections(self):
         self.load.clicked.connect(self.load_data)
         self.remove.clicked.connect(self.clear_table)
@@ -79,6 +82,7 @@ class stock_predictor(QtWidgets.QMainWindow):
         self.window = manual.manual()
         self.window.show()
 
+    # function for position and size of various widgets
     def measurements(self):
         desktop = QApplication.desktop()
         screenRect = desktop.screenGeometry()
@@ -88,6 +92,11 @@ class stock_predictor(QtWidgets.QMainWindow):
         self.data_table.setGeometry(0, 145, width, height - 250)
         self.showMaximized()
 
+
+    # function that performs linear regression on the given stock data file.
+    # Here, X i.e. moving average, is the independent variable
+    # and y i.e. the closing price, is the dependent variable.
+    # The stock price will be predicted based on moving average.
     def linear_regression(self):
         df = pd.read_csv(GLOBAL_VALUE.FILE)
         df = df.dropna()
@@ -114,6 +123,9 @@ class stock_predictor(QtWidgets.QMainWindow):
         plt.legend(['Closing Price', 'Test Value', 'Prediction'], loc = "upper left")
         plt.show()
 
+    # function that performs lasso regression on the given stock data file.
+    # This function is similar to linear regression. The only difference here
+    # is that it uses lasso regression.
     def lasso_regression(self):
         df = pd.read_csv(GLOBAL_VALUE.FILE)
         df = df.dropna()
@@ -141,6 +153,13 @@ class stock_predictor(QtWidgets.QMainWindow):
         plt.legend(['Closing Price', 'Test Value', 'Prediction'], loc = "upper left")
         plt.show()
 
+    # Function for kNN
+    # Here, the independent variable is ['Open-Close', 'High-Low']. 
+    # The dependent variable stores the trading signal.
+    # If tomorrow’s price is greater than today’s price then we will store 1 (buy signal)
+    # and if it's lesser than today's price then we will store -1 (sell signal).
+    # The number of neighbors used is 10. Finally, we will provide
+    # a chart of predicted returns vs actual returns.
     def k_nearest_neighbors(self):
         df = pd.read_csv(GLOBAL_VALUE.FILE)
         df = df.dropna()
@@ -148,13 +167,13 @@ class stock_predictor(QtWidgets.QMainWindow):
         df['High-Low']  = df['high'] - df['low']
         df = df.dropna()
         X = df[['Open-Close', 'High-Low']]
-        y = np.where(df['close'].shift(-1)>df['close'],1, 0)
+        y = np.where(df['close'].shift(-1)>df['close'],1, -1)
         t = int(0.8*len(df))
         X_train = X[:t]
         y_train = y[:t]
         X_test = X[t:]
         y_test = y[t:]
-        model = KNeighborsClassifier(n_neighbors=5).fit(X_train, y_train)
+        model = KNeighborsClassifier(n_neighbors=10).fit(X_train, y_train)
         df['pred'] = model.predict(X)
         acc = accuracy_score(y, df['pred'])
         GLOBAL_VALUE.ACC = acc*100
@@ -171,6 +190,7 @@ class stock_predictor(QtWidgets.QMainWindow):
         plt.legend(['Actual', 'Prediction'], loc = "upper left")
         plt.show()
 
+    # The SVM function takes the same values for X and y as kNN 
     def support_vector_machine(self):
         df = pd.read_csv(GLOBAL_VALUE.FILE)
         df = df.dropna()
@@ -178,7 +198,7 @@ class stock_predictor(QtWidgets.QMainWindow):
         df['High-Low']  = df['high'] - df['low']
         df = df.dropna()
         X = df[['Open-Close', 'High-Low']]
-        y = np.where(df['close'].shift(-1)>df['close'],1, 0)
+        y = np.where(df['close'].shift(-1)>df['close'],1, -1)
         t = int(0.8*len(df))
         X_train = X[:t]
         y_train = y[:t]
@@ -201,8 +221,7 @@ class stock_predictor(QtWidgets.QMainWindow):
         plt.legend(['Actual', 'Prediction'], loc = "upper left")
         plt.show()
 
-
-
+    # function to load the stock file
     def load_data(self):
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
@@ -211,6 +230,10 @@ class stock_predictor(QtWidgets.QMainWindow):
             self.view_table(fileName)
         else:
              QMessageBox.critical(self, "Error", "Error loading file! Try again")
+
+
+    # The below give four functions lin_reg, lasso, knn, and svm call the ML functions 
+    # and set text for accuracy and status bar.
 
     def lin_reg(self):
         if GLOBAL_VALUE.FILE == "":
@@ -260,13 +283,15 @@ class stock_predictor(QtWidgets.QMainWindow):
             except:
                 QMessageBox.critical(self, "Error", "Graph plotting failed")
 
-
+    # Removes all the entries from the table and the columns.
+    # It also resets the accuracy to 00.00%.
     def clear_table(self):
         self.data_table.setRowCount(0)
         self.data_table.setColumnCount(0)
         self.statusBar().showMessage("Table cleared")
         self.acc.setText("00.00%")
-        
+
+    # Displays the stock price data in the main table        
     def view_table(self, file):
         data = []
         with open(file, 'r') as stream:

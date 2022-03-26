@@ -18,5 +18,5 @@ import stock_predictor
           
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
-    window = stock_predictor.stock_predictor()
+    window = stock_predictor.stock_predictor()  #calls the main window
     app.exec_()

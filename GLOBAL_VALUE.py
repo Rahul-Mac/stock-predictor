@@ -11,5 +11,7 @@ You should have received a copy of the GNU General Public License along with Sto
 If not, see <https://www.gnu.org/licenses/>.
 '''
 
-FILE = ""
-ACC = 0
+# This file contains all the global variables used in the code.
+
+FILE = ""   # Stores the name of the file 
+ACC = 0     # Stores the accuracy of the selected ML model
