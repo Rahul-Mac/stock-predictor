@@ -43,7 +43,7 @@ class stock_predictor(QtWidgets.QMainWindow):
     # for window, buttons, and status bar
     def names(self):
         self.setWindowTitle("Stock Predictor")
-        self.statusBar().showMessage("Welcome to Stock Predictor v0.2.0")
+        self.statusBar().showMessage("Welcome to Stock Predictor v0.2.1")
         self.lin_reg_btn.setText("Linear\nRegression")
         self.lasso_btn.setText("Lasso\nRegression")
         self.knn_btn.setText("k-Nearest\nNeighbors")
@@ -62,7 +62,7 @@ class stock_predictor(QtWidgets.QMainWindow):
         self.man.clicked.connect(self.manual)
 
     def abt_win(self):
-        text = "Stock Predictor v0.2.0\nis a stock price prediction software.\n\nCopyright (C) 2022 Rahul Mac\n under GNU GPL v3 License"
+        text = "Stock Predictor v0.2.1\nis a stock price prediction software.\n\nCopyright (C) 2022 Rahul Mac\n under GNU GPL v3 License"
         QMessageBox().about(self, "About", text)
 
     def lic_win(self):

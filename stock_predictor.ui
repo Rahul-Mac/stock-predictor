@@ -13,6 +13,9 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
+  <property name="statusTip">
+   <string/>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QTabWidget" name="ribbon">
     <property name="geometry">
@@ -22,6 +25,9 @@
       <width>1061</width>
       <height>141</height>
      </rect>
+    </property>
+    <property name="statusTip">
+     <string/>
     </property>
     <property name="styleSheet">
      <string notr="true">QToolBar {
@@ -110,6 +116,9 @@ QToolButton:checked{
         <height>81</height>
        </rect>
       </property>
+      <property name="statusTip">
+       <string>Load stock data file (CSV)</string>
+      </property>
       <property name="text">
        <string>Load Data</string>
       </property>
@@ -135,6 +144,9 @@ QToolButton:checked{
         <width>71</width>
         <height>81</height>
        </rect>
+      </property>
+      <property name="statusTip">
+       <string>Perform Lasso Regression on the data</string>
       </property>
       <property name="text">
        <string>Lasso</string>
@@ -162,6 +174,9 @@ QToolButton:checked{
         <height>81</height>
        </rect>
       </property>
+      <property name="statusTip">
+       <string>Perform Linear Regression on the data</string>
+      </property>
       <property name="text">
        <string>Linear</string>
       </property>
@@ -187,6 +202,9 @@ QToolButton:checked{
         <width>71</width>
         <height>81</height>
        </rect>
+      </property>
+      <property name="statusTip">
+       <string>Clear the populated data from the table</string>
       </property>
       <property name="text">
        <string>Remove Data</string>
@@ -272,6 +290,9 @@ QToolButton:checked{
         <height>81</height>
        </rect>
       </property>
+      <property name="statusTip">
+       <string>Use K-Nearest Neighbors on the data</string>
+      </property>
       <property name="text">
        <string>knn</string>
       </property>
@@ -297,6 +318,9 @@ QToolButton:checked{
         <width>71</width>
         <height>81</height>
        </rect>
+      </property>
+      <property name="statusTip">
+       <string>Use Support Vector Machine on the data</string>
       </property>
       <property name="text">
        <string>svm</string>
@@ -329,6 +353,9 @@ QToolButton:checked{
         <family>Verdana</family>
         <pointsize>20</pointsize>
        </font>
+      </property>
+      <property name="statusTip">
+       <string>Acccuracy score of the selected ML model</string>
       </property>
       <property name="text">
        <string>00.00%</string>
@@ -381,6 +408,9 @@ QToolButton:checked{
         <height>81</height>
        </rect>
       </property>
+      <property name="statusTip">
+       <string>Brief information about the software</string>
+      </property>
       <property name="text">
        <string>About</string>
       </property>
@@ -407,6 +437,9 @@ QToolButton:checked{
         <height>81</height>
        </rect>
       </property>
+      <property name="statusTip">
+       <string>Short manual of the software</string>
+      </property>
       <property name="text">
        <string>Manual</string>
       </property>
@@ -432,6 +465,9 @@ QToolButton:checked{
         <width>71</width>
         <height>81</height>
        </rect>
+      </property>
+      <property name="statusTip">
+       <string>License notice of the software</string>
       </property>
       <property name="text">
        <string>License</string>
@@ -518,6 +554,9 @@ QToolButton:checked{
       <width>781</width>
       <height>431</height>
      </rect>
+    </property>
+    <property name="statusTip">
+     <string/>
     </property>
    </widget>
   </widget>
