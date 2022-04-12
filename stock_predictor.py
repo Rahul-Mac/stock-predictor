@@ -167,13 +167,13 @@ class stock_predictor(QtWidgets.QMainWindow):
         df['High-Low']  = df['high'] - df['low']
         df = df.dropna()
         X = df[['Open-Close', 'High-Low']]
-        y = np.where(df['close'].shift(1)>df['close'] , 1, -1)
+        y = np.where(df['close'].shift(-1)>df['close'] , 1, -1)
         t = int(0.8*len(df))
         X_train = X[:t]
         y_train = y[:t]
         X_test = X[t:]
         y_test = y[t:]
-        model = KNeighborsClassifier(n_neighbors=50).fit(X_train, y_train)
+        model = KNeighborsClassifier(n_neighbors=100).fit(X_train, y_train)
         df['pred'] = model.predict(X)
         acc = accuracy_score(y, df['pred'])
         GLOBAL_VALUE.ACC = acc*100
@@ -184,7 +184,7 @@ class stock_predictor(QtWidgets.QMainWindow):
         df['ret'] = df['ret']*10
         df['str'] = df['str']*10
         plt.plot(df['ret'])
-        df['str'] = df['str'].abs()
+        #df['str'] = df['str'].abs()
         plt.plot(df['str'])
         plt.xlabel('Date')
         plt.ylabel('Returns (%)')
@@ -199,7 +199,7 @@ class stock_predictor(QtWidgets.QMainWindow):
         df['High-Low']  = df['high'] - df['low']
         df = df.dropna()
         X = df[['Open-Close', 'High-Low']]
-        y = np.where(df['close'].shift(1)>df['close'],1, -1)
+        y = np.where(df['close'].shift(-1)>df['close'],1, -1)
         t = int(0.8*len(df))
         X_train = X[:t]
         y_train = y[:t]
@@ -216,7 +216,7 @@ class stock_predictor(QtWidgets.QMainWindow):
         df['ret'] = df['ret']*10
         df['str'] = df['str']*10
         plt.plot(df['ret'])
-        df['str'] = df['str'].abs()
+        #df['str'] = df['str'].abs()
         plt.plot(df['str'])
         plt.xlabel('Date')
         plt.ylabel('Returns (%)')
