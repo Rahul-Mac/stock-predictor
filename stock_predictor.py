@@ -31,6 +31,7 @@ from sklearn.metrics import accuracy_score
 from sklearn.svm import SVC
 import sklearn.utils._typedefs
 import sklearn.neighbors._partition_nodes
+import manual
 
 INS = wx.Window.NewControlId()
 DEL = wx.Window.NewControlId()
@@ -297,11 +298,7 @@ class stock_predictor(wx.Frame):
         self.data_button_bar.EnableButton(DEL, False)
         self.acc.SetLabel("00.00%")
     def show_about(self, e):
-        description = """
-        Stock Predictor v2.0.0 is a stock price prediction software that
-        uses machine learning algorithms like Linear Regression, Lasso Regression,
-        K-Nearest Neighbours, and Support Vector Machine to predict stock prices.
-        """
+        description = "Stock Predictor is a stock price prediction software that uses machine learning algorithms like Linear Regression, Lasso Regression, K-Nearest Neighbours, and Support Vector Machine to predict stock prices."
         
         licence = """
         Stock Predictor
@@ -329,6 +326,12 @@ class stock_predictor(wx.Frame):
         wx.adv.AboutBox(info)
 
 
+    def show_manual(self, event):
+        self.man = manual.manual(None, "Manual")
+        self.man.ShowModal()
+        self.man.Destroy()
+
+
     def help(self):
         self.help_page = RB.RibbonPage(self.ribbon, wx.ID_ANY, "Help")
         
@@ -337,6 +340,7 @@ class stock_predictor(wx.Frame):
         self.info_button_bar.AddSimpleButton(ABT, "About", self.abt_bmp, '')
         self.info_button_bar.AddSimpleButton(MAN, "Manual", self.man_bmp, '')
         self.info_button_bar.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.show_about, id = ABT)
+        self.info_button_bar.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.show_manual, id = MAN)
 
     def view_table(self):
         self.data.clear()
