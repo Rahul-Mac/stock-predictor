@@ -11,9 +11,13 @@ You should have received a copy of the GNU General Public License along with Sto
 If not, see <https://www.gnu.org/licenses/>.
 '''
 
-from PyQt5 import QtCore, QtGui, QtWidgets, uic
-from PyQt5.QtWidgets import QMessageBox, QTableWidgetItem, QFileDialog, QApplication
+__author__ = "Rahul Mac"
+
+import wx
+import wx.lib.agw.ribbon as RB
+import wx.grid as grid
 import csv
+import wx.adv
 import GLOBAL_VALUE
 import math
 import pandas as pd
@@ -27,71 +31,86 @@ from sklearn.metrics import accuracy_score
 from sklearn.svm import SVC
 import sklearn.utils._typedefs
 import sklearn.neighbors._partition_nodes
-import manual
 
-class stock_predictor(QtWidgets.QMainWindow):
-    def __init__(self):
-        super(stock_predictor, self).__init__()
-        uic.loadUi('stock_predictor.ui', self)
-        self.connections()
-        self.measurements()
-        self.names()
-        self.setWindowIcon(QtGui.QIcon('icon.ico'))
-        self.show()
+INS = wx.Window.NewControlId()
+DEL = wx.Window.NewControlId()
+LIN = wx.Window.NewControlId()
+LAS = wx.Window.NewControlId()
+KNN = wx.Window.NewControlId()
+SVM = wx.Window.NewControlId()
+ABT = wx.Window.NewControlId()
+MAN = wx.Window.NewControlId()
 
-    # This function is used to set texts
-    # for window, buttons, and status bar
-    def names(self):
-        self.setWindowTitle("Stock Predictor")
-        self.statusBar().showMessage("Welcome to Stock Predictor v1.0.0")
-        self.lin_reg_btn.setText("Linear\nRegression")
-        self.lasso_btn.setText("Lasso\nRegression")
-        self.knn_btn.setText("k-Nearest\nNeighbors")
-        self.svm_btn.setText("Sprt. Vector\nMachine")
+class stock_predictor(wx.Frame):
+    def __init__(self, *args, **kw):
+        super(stock_predictor, self).__init__(*args, **kw)
+        self.SetTitle('Stock Predictor')
+        self.ribbon = RB.RibbonBar(self, -1)
+        self.icons()
+        self.home()
+        self.help()
+        self.ribbon.Realize()
+        self.mygrid = grid.Grid(self)
+        s = wx.BoxSizer(wx.VERTICAL)
+        s.Add(self.ribbon, 0, wx.EXPAND)
+        s.Add(self.mygrid, 1, wx.EXPAND)
+        self.SetSizer(s)
+        self.statusBar = self.CreateStatusBar(style = wx.BORDER_NONE)
+        self.statusBar.SetStatusText("Welcome to Stock Predictor")
+        self.Show(True)
+        self.Maximize(True)
+        self.mygrid.CreateGrid(0, 0)
+        self.data = []
 
-    # Connects button click to function
-    def connections(self):
-        self.load.clicked.connect(self.load_data)
-        self.remove.clicked.connect(self.clear_table)
-        self.lin_reg_btn.clicked.connect(self.lin_reg)
-        self.lasso_btn.clicked.connect(self.lasso)
-        self.knn_btn.clicked.connect(self.knn)
-        self.svm_btn.clicked.connect(self.svm)
-        self.abt.clicked.connect(self.abt_win)
-        self.lic.clicked.connect(self.lic_win)
-        self.man.clicked.connect(self.manual)
+    def icons(self):
+        self.ins_bmp = wx.Bitmap('ins.png')
+        self.del_bmp = wx.Bitmap('del.png')
+        self.lin_bmp = wx.Bitmap('lin.png')
+        self.las_bmp = wx.Bitmap('las.png')
+        self.knn_bmp = wx.Bitmap('knn.png')
+        self.svm_bmp = wx.Bitmap('svm.png')
+        self.abt_bmp = wx.Bitmap('abt.png')
+        self.man_bmp = wx.Bitmap('man.png')
+        self.mla_bmp = wx.Bitmap('mla.png')
+        self.dat_bmp = wx.Bitmap('dat.ico')
+        self.SetIcon(wx.Icon("icon.ico"))
 
-    def abt_win(self):
-        text = "Stock Predictor v1.0.0\nis a stock price prediction software.\n\nCopyright (C) 2022 Rahul Mac\n under GNU GPL v3 License"
-        QMessageBox().about(self, "About", text)
+    def home(self):
+        self.home_page = RB.RibbonPage(self.ribbon, wx.ID_ANY, "Home")
+        
+        self.data_panel = RB.RibbonPanel(self.home_page, wx.ID_ANY, "Data", self.dat_bmp)
+        self.data_button_bar = RB.RibbonButtonBar(self.data_panel)
+        self.data_button_bar.AddSimpleButton(INS, "Load Data", self.ins_bmp, '')
+        self.data_button_bar.AddSimpleButton(DEL, "Remove Data", self.del_bmp, '')
+        self.data_button_bar.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.load_data, id = INS)
+        self.data_button_bar.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.remove_data, id = DEL)
+        self.data_button_bar.EnableButton(DEL, False)
 
-    def lic_win(self):
-        text = "\t\t\tStock Predictor\n\
-        Copyright (C) 2022  Rahul Mac\n\n\
-        This program is free software: you can redistribute it and/or modify\n\
-        it under the terms of the GNU General Public License as published by\n\
-        the Free Software Foundation, either version 3 of the License, or\n\
-        (at your option) any later version.\n\n\
-        This program is distributed in the hope that it will be useful,\n\
-        but WITHOUT ANY WARRANTY; without even the implied warranty of\n\
-        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n\
-        GNU General Public License for more details."
-        QMessageBox().about(self, "License", text)
+        self.model_panel = RB.RibbonPanel(self.home_page, wx.ID_ANY, "Models", self.mla_bmp)
+        self.model_button_bar = RB.RibbonButtonBar(self.model_panel)
+        self.model_button_bar.AddSimpleButton(LIN, "Linear Regression", self.lin_bmp, '')
+        self.model_button_bar.AddSimpleButton(LAS, "Lasso Regression", self.las_bmp, '')
+        self.model_button_bar.AddSimpleButton(KNN, "K-Nearest Neighbors", self.knn_bmp, '')
+        self.model_button_bar.AddSimpleButton(SVM, "Support Vector Machines", self.svm_bmp, '')
+        self.model_button_bar.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.lin_fun, id = LIN)
+        self.model_button_bar.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.las_fun, id = LAS)
+        self.model_button_bar.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.knn_fun, id = KNN)
+        self.model_button_bar.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.svm_fun, id = SVM)
+        self.model_button_bar.EnableButton(LIN, False)
+        self.model_button_bar.EnableButton(LAS, False)
+        self.model_button_bar.EnableButton(KNN, False)
+        self.model_button_bar.EnableButton(SVM, False)
 
-    def manual(self):
-        self.window = manual.manual()
-        self.window.show()
-
-    # function for position and size of various widgets
-    def measurements(self):
-        desktop = QApplication.desktop()
-        screenRect = desktop.screenGeometry()
-        width = screenRect.width()
-        height = screenRect.height()
-        self.ribbon.setGeometry(0, 0, width, 141)
-        self.data_table.setGeometry(0, 145, width, height - 250)
-        self.showMaximized()
-
+        self.acc_panel = RB.RibbonPanel(self.home_page, wx.ID_ANY, "Accuracy")
+        self.acc = wx.StaticText(self.acc_panel, id = wx.ID_ANY, label ="00.00%", style = wx.ALIGN_CENTRE_HORIZONTAL)
+        font = wx.Font(wx.FontInfo(20))
+        self.acc.SetFont(font)
+        self.acc.SetForegroundColour(wx.Colour(0, 0, 0))
+        '''sizer_panelsizer = wx.BoxSizer(wx.VERTICAL)
+        #sizer_panelsizer.AddStretchSpacer(1)
+        sizer_panelsizer.Add(self.acc, 0, wx.ALL|wx.EXPAND, 2)
+        #sizer_panelsizer.AddStretchSpacer(5)
+        self.acc_panel.SetSizer(sizer_panelsizer)'''
 
     # function that performs linear regression on the given stock data file.
     # Here, X i.e. moving average, is the independent variable
@@ -114,6 +133,7 @@ class stock_predictor(QtWidgets.QMainWindow):
         pred = model.predict(X_test)
         acc = model.score(pred, y_test)
         GLOBAL_VALUE.ACC = acc*100
+        self.acc.SetLabel("Linear Regression = "+str(GLOBAL_VALUE.ACC) + "%")
         pred = pd.DataFrame(pred,index = y_test.index, columns = ['price'])
         plt.plot(y)
         plt.plot(y_test)
@@ -144,6 +164,7 @@ class stock_predictor(QtWidgets.QMainWindow):
         pred = pred.reshape(-1, 1)
         acc = model.score(pred, y_test)
         GLOBAL_VALUE.ACC = acc*100
+        self.acc.SetLabel("Lasso Regression = "+str(GLOBAL_VALUE.ACC) + "%")
         pred = pd.DataFrame(pred,index = y_test.index, columns = ['price'])
         plt.plot(y)
         plt.plot(y_test)
@@ -160,7 +181,7 @@ class stock_predictor(QtWidgets.QMainWindow):
     # and if it's lesser than today's price then we will store -1 (sell signal).
     # The number of neighbors used is 10. Finally, we will provide
     # a chart of predicted returns vs actual returns.
-    def k_nearest_neighbors(self):
+    def k_nearest_neighbours(self):
         df = pd.read_csv(GLOBAL_VALUE.FILE)
         df = df.dropna()
         df['Open-Close']= df['open'] - df['close']
@@ -177,6 +198,7 @@ class stock_predictor(QtWidgets.QMainWindow):
         df['pred'] = model.predict(X)
         acc = accuracy_score(y, df['pred'])
         GLOBAL_VALUE.ACC = acc*100
+        self.acc.SetLabel("K-Nearest Neighbours = "+str(GLOBAL_VALUE.ACC) + "%")
         df['ret'] = df['close'].pct_change()
         df['str'] = df['ret']*df['pred'].shift(1)
         df['ret'] = df['ret'].cumsum()
@@ -209,6 +231,7 @@ class stock_predictor(QtWidgets.QMainWindow):
         df['pred'] = model.predict(X)
         acc = accuracy_score(y, df['pred'])
         GLOBAL_VALUE.ACC = acc*100
+        self.acc.SetLabel("Support Vector Machine = "+str(GLOBAL_VALUE.ACC) + "%")
         df['ret'] = df['close'].pct_change()
         df['str'] = df['ret']*df['pred'].shift(1)
         df['ret'] = df['ret'].cumsum()
@@ -223,96 +246,116 @@ class stock_predictor(QtWidgets.QMainWindow):
         plt.legend(['Actual', 'Prediction'], loc = "upper left")
         plt.show()
 
-    # function to load the stock file
-    def load_data(self):
-        options = QFileDialog.Options()
-        options |= QFileDialog.DontUseNativeDialog
-        fileName,_ = QFileDialog.getOpenFileName(self,"Select Stock Data File", "","CSV Files (*.csv)", options=options)
-        if fileName:
-            self.view_table(fileName)
-        else:
-             QMessageBox.critical(self, "Error", "Error loading file! Try again")
+    def lin_fun(self, e):
+        try:
+            self.linear_regression()
+        except Exception as e:
+            wx.MessageBox(str(e), 'Error', wx.OK | wx.ICON_INFORMATION)
 
+    def las_fun(self, e):
+        try:
+            self.lasso_regression()
+        except Exception as e:
+            wx.MessageBox(str(e), 'Error', wx.OK | wx.ICON_INFORMATION)
 
-    # The below give four functions lin_reg, lasso, knn, and svm call the ML functions 
-    # and set text for accuracy and status bar.
+    def knn_fun(self, e):
+        try:
+            self.k_nearest_neighbours()
+        except Exception as e:
+            wx.MessageBox(str(e), 'Error', wx.OK | wx.ICON_INFORMATION)
 
-    def lin_reg(self):
+    def svm_fun(self, e):
+        try:
+            self.support_vector_machine()
+        except Exception as e:
+            wx.MessageBox(str(e), 'Error', wx.OK | wx.ICON_INFORMATION)
+
+    def load_data(self, e):
+        openFileDialog = wx.FileDialog(self, "Open", "", "", "CSV files (*.csv)|*.csv", wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
+        openFileDialog.ShowModal()
+        GLOBAL_VALUE.FILE = openFileDialog.GetPath()
         if GLOBAL_VALUE.FILE == "":
-            QMessageBox.critical(self, "Error", "Stock data file has not been loaded")
+            wx.MessageBox("File not selected", 'Error', wx.OK | wx.ICON_INFORMATION)
         else:
-            try:
-                self.linear_regression()
-                GLOBAL_VALUE.ACC = "{:.2f}".format(float(GLOBAL_VALUE.ACC))
-                self.acc.setText(str(GLOBAL_VALUE.ACC)+"%")
-                self.statusBar().showMessage("Linear Regression Accuracy = "+str(GLOBAL_VALUE.ACC)+"%")
-            except:
-                QMessageBox.critical(self, "Error", "Graph plotting failed")
+            self.view_table()
+            self.model_button_bar.EnableButton(LIN, True)
+            self.model_button_bar.EnableButton(LAS, True)
+            self.model_button_bar.EnableButton(KNN, True)
+            self.model_button_bar.EnableButton(SVM, True)
+            self.data_button_bar.EnableButton(INS, False)
+            self.data_button_bar.EnableButton(DEL, True)
 
-    def lasso(self):
-        if GLOBAL_VALUE.FILE == "":
-            QMessageBox.critical(self, "Error", "Stock data file has not been loaded")
-        else:
-            try:
-                self.lasso_regression()
-                GLOBAL_VALUE.ACC = "{:.2f}".format(float(GLOBAL_VALUE.ACC))
-                self.acc.setText(str(GLOBAL_VALUE.ACC)+"%")
-                self.statusBar().showMessage("Lasso Regression Accuracy = "+str(GLOBAL_VALUE.ACC)+"%")
-            except:
-                QMessageBox.critical(self, "Error", "Graph plotting failed")
+    def remove_data(self, e):
+        self.mygrid.DeleteRows(0, len(self.data))
+        self.mygrid.DeleteCols(0, len(self.data[0]))
+        self.data.clear()
+        self.model_button_bar.EnableButton(LIN, False)
+        self.model_button_bar.EnableButton(LAS, False)
+        self.model_button_bar.EnableButton(KNN, False)
+        self.model_button_bar.EnableButton(SVM, False)
+        self.data_button_bar.EnableButton(INS, True)
+        self.data_button_bar.EnableButton(DEL, False)
+        self.acc.SetLabel("00.00%")
+    def show_about(self, e):
+        description = """
+        Stock Predictor v2.0.0 is a stock price prediction software that
+        uses machine learning algorithms like Linear Regression, Lasso Regression,
+        K-Nearest Neighbours, and Support Vector Machine to predict stock prices.
+        """
+        
+        licence = """
+        Stock Predictor
+        Copyright (C) 2022  Rahul Mac
+        This program is free software: you can redistribute it and/or modify
+        it under the terms of the GNU General Public License as published by
+        the Free Software Foundation, either version 3 of the License, or
+        (at your option) any later version.
+        
+        This program is distributed in the hope that it will be useful,
+        but WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        GNU General Public License for more details.
+        """
+        
+        info = wx.adv.AboutDialogInfo()
+        info.SetIcon(wx.Icon('icon.ico'))
+        info.SetName('Stock Predictor')
+        info.SetVersion('2.0.0')
+        info.SetDescription(description)
+        info.SetCopyright('Copyright (C) 2022 Rahul Mac under GNU GPL v3 License')
+        info.SetWebSite('https://github.com/Rahul-Mac/stock-predictor')
+        info.SetLicence(licence)
+        info.AddDeveloper('Rahul Mac')
+        wx.adv.AboutBox(info)
 
-    def knn(self):
-        if GLOBAL_VALUE.FILE == "":
-            QMessageBox.critical(self, "Error", "Stock data file has not been loaded")
-        else:
-            try:
-                self.k_nearest_neighbors()
-                GLOBAL_VALUE.ACC = "{:.2f}".format(float(GLOBAL_VALUE.ACC))
-                self.acc.setText(str(GLOBAL_VALUE.ACC)+"%")
-                self.statusBar().showMessage("k-Nearest Neighbors Accuracy = "+str(GLOBAL_VALUE.ACC)+"%")
-            except:
-                QMessageBox.critical(self, "Error", "Graph plotting failed")
 
-    def svm(self):
-        if GLOBAL_VALUE.FILE == "":
-            QMessageBox.critical(self, "Error", "Stock data file has not been loaded")
-        else:
-            try:
-                self.support_vector_machine()
-                GLOBAL_VALUE.ACC = "{:.2f}".format(float(GLOBAL_VALUE.ACC))
-                self.acc.setText(str(GLOBAL_VALUE.ACC)+"%")
-                self.statusBar().showMessage("Support Vector Machine Accuracy = "+str(GLOBAL_VALUE.ACC)+"%")
-            except:
-                QMessageBox.critical(self, "Error", "Graph plotting failed")
+    def help(self):
+        self.help_page = RB.RibbonPage(self.ribbon, wx.ID_ANY, "Help")
+        
+        self.info_panel = RB.RibbonPanel(self.help_page, wx.ID_ANY, "Information")
+        self.info_button_bar = RB.RibbonButtonBar(self.info_panel)
+        self.info_button_bar.AddSimpleButton(ABT, "About", self.abt_bmp, '')
+        self.info_button_bar.AddSimpleButton(MAN, "Manual", self.man_bmp, '')
+        self.info_button_bar.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.show_about, id = ABT)
 
-    # Removes all the entries from the table and the columns.
-    # It also resets the accuracy to 00.00%.
-    def clear_table(self):
-        self.data_table.setRowCount(0)
-        self.data_table.setColumnCount(0)
-        self.statusBar().showMessage("Table cleared")
-        self.acc.setText("00.00%")
+    def view_table(self):
+        self.data.clear()
+        try:
+            with open(GLOBAL_VALUE.FILE, 'r') as stream:
+                for rowdata in csv.reader(stream):
+                    self.data.append(rowdata)
+        except Exception as e:
+            wx.MessageBox(str(e), 'Error', wx.OK | wx.ICON_INFORMATION)
+        labels = self.data[0]
+        del self.data[0]
+        rows = len(self.data)
+        cols = len(self.data[0])
+        for i in range(len(labels)):
+            self.mygrid.AppendCols(1)
+            self.mygrid.SetColLabelValue( i, labels[i])
+        for row in range (rows):
+            self.mygrid.AppendRows(1)
+            for col in range(cols):
+                self.mygrid.SetCellValue(row, col, self.data[row][col])
 
-    # Displays the stock price data in the main table        
-    def view_table(self, file):
-        data = []
-        with open(file, 'r') as stream:
-            for rowdata in csv.reader(stream):
-                data.append(rowdata)
-        labels = data[0]
-        del data[0]
-        nb_row = len(data)
-        nb_col = len(data[0])
-        self.data_table.setRowCount(nb_row)
-        self.data_table.setColumnCount(nb_col)
-        self.data_table.setHorizontalHeaderLabels(labels)
-        header = self.data_table.horizontalHeader() 
-        header.setSectionResizeMode(5, QtWidgets.QHeaderView.Stretch)
-        for row in range (nb_row):
-            for col in range(nb_col):
-                item = QTableWidgetItem(str(data[row][col]))
-                item.setFlags(QtCore.Qt.ItemIsEnabled)
-                self.data_table.setItem(row, col, item)
-        GLOBAL_VALUE.FILE = file
-        self.statusBar().showMessage("Stock data loaded\tFile:"+GLOBAL_VALUE.FILE)
 

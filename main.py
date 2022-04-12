@@ -13,12 +13,12 @@ You should have received a copy of the GNU General Public License along with Sto
 If not, see <https://www.gnu.org/licenses/>.
 '''
 
-from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QApplication
-import sys
+__author__ = "Rahul Mac"
+
+import wx
 import stock_predictor
           
 if __name__ == "__main__":
-    app = QtWidgets.QApplication(sys.argv)
-    window = stock_predictor.stock_predictor()  # calls the main window
-    app.exec_()
+    app = wx.App() 
+    stock_predictor.stock_predictor(None) 
+    app.MainLoop()  
