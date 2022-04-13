@@ -5,7 +5,7 @@ This software is used predict stock prices using various ML models.
 * Download the source code
 * Install the dependencies
   ```
-    pip install PyQt5
+    sudo apt install python3-wxgtk4.0
     pip install pandas
     pip install sklearn
     pip install seaborn
