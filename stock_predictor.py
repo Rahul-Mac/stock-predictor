@@ -189,7 +189,7 @@ class stock_predictor(wx.Frame):
         df['High-Low']  = df['high'] - df['low']
         df = df.dropna()
         X = df[['Open-Close', 'High-Low']]
-        y = np.where(df['close'].shift(-1)>df['close'] , 1, -1)
+        y = np.where(df['close'].shift(-500)>df['close'] , 1, -1)
         t = int(0.8*len(df))
         X_train = X[:t]
         y_train = y[:t]
@@ -201,7 +201,7 @@ class stock_predictor(wx.Frame):
         GLOBAL_VALUE.ACC = acc*100
         self.acc.SetLabel("K-Nearest Neighbours = "+str(GLOBAL_VALUE.ACC) + "%")
         df['ret'] = df['close'].pct_change()
-        df['str'] = df['ret']*df['pred'].shift(1)
+        df['str'] = df['ret']*df['pred'].shift(500)
         df['ret'] = df['ret'].cumsum()
         df['str'] = df['str'].cumsum()
         df['ret'] = df['ret']*10
@@ -222,7 +222,7 @@ class stock_predictor(wx.Frame):
         df['High-Low']  = df['high'] - df['low']
         df = df.dropna()
         X = df[['Open-Close', 'High-Low']]
-        y = np.where(df['close'].shift(-1)>df['close'],1, -1)
+        y = np.where(df['close'].shift(-500)>df['close'],1, -1)
         t = int(0.8*len(df))
         X_train = X[:t]
         y_train = y[:t]
@@ -234,7 +234,7 @@ class stock_predictor(wx.Frame):
         GLOBAL_VALUE.ACC = acc*100
         self.acc.SetLabel("Support Vector Machine = "+str(GLOBAL_VALUE.ACC) + "%")
         df['ret'] = df['close'].pct_change()
-        df['str'] = df['ret']*df['pred'].shift(1)
+        df['str'] = df['ret']*df['pred'].shift(500)
         df['ret'] = df['ret'].cumsum()
         df['str'] = df['str'].cumsum()
         df['ret'] = df['ret']*10
