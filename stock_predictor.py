@@ -34,6 +34,7 @@ import sklearn.neighbors._partition_nodes
 import locale
 import manual
 
+# Creates new IDs
 INS = wx.Window.NewControlId()
 DEL = wx.Window.NewControlId()
 LIN = wx.Window.NewControlId()
@@ -65,6 +66,8 @@ class stock_predictor(wx.Frame):
         self.mygrid.CreateGrid(0, 0)
         self.data = []
 
+    # Converts images in Bitmap format.
+    # This function also sets the icon of the software.
     def icons(self):
         self.ins_bmp = wx.Bitmap('ins.png')
         self.del_bmp = wx.Bitmap('del.png')
@@ -78,6 +81,7 @@ class stock_predictor(wx.Frame):
         self.dat_bmp = wx.Bitmap('dat.ico')
         self.SetIcon(wx.Icon("icon.ico"))
 
+    # This function creates the "Home" Ribbon Page
     def home(self):
         self.home_page = RB.RibbonPage(self.ribbon, wx.ID_ANY, "Home")
         
@@ -267,6 +271,7 @@ class stock_predictor(wx.Frame):
         except Exception as e:
             wx.MessageBox(str(e), 'Error', wx.OK | wx.ICON_INFORMATION)
 
+    # Loads stock price file data (CSV)
     def load_data(self, e):
         openFileDialog = wx.FileDialog(self, "Open", "", "", "CSV files (*.csv)|*.csv", wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
         openFileDialog.ShowModal()
@@ -282,6 +287,7 @@ class stock_predictor(wx.Frame):
             self.data_button_bar.EnableButton(INS, False)
             self.data_button_bar.EnableButton(DEL, True)
 
+    # Removes stock price data from table
     def remove_data(self, e):
         self.mygrid.DeleteRows(0, len(self.data))
         self.mygrid.DeleteCols(0, len(self.data[0]))
@@ -293,8 +299,14 @@ class stock_predictor(wx.Frame):
         self.data_button_bar.EnableButton(INS, True)
         self.data_button_bar.EnableButton(DEL, False)
         self.acc.SetLabel("00.00%")
+
+    # Displays information about the software
     def show_about(self, e):
-        description = "Stock Predictor is a stock price prediction software that uses machine learning algorithms like Linear Regression, Lasso Regression, K-Nearest Neighbours, and Support Vector Machine to predict stock prices."
+        description = """
+        Stock Predictor is a stock price prediction software that uses machine learning algorithms
+        like Linear Regression, Lasso Regression, K-Nearest Neighbours, and Support Vector Machine
+        to predict stock prices.
+        """
         
         licence = """
         Stock Predictor
@@ -321,13 +333,13 @@ class stock_predictor(wx.Frame):
         info.AddDeveloper('Rahul Mac')
         wx.adv.AboutBox(info)
 
-
+    # Displays a manual 
     def show_manual(self, event):
         self.man = manual.manual(None, "Manual")
         self.man.ShowModal()
         self.man.Destroy()
 
-
+    # This function creates the "Help" Ribbon Page
     def help(self):
         self.help_page = RB.RibbonPage(self.ribbon, wx.ID_ANY, "Help")
         
@@ -338,6 +350,7 @@ class stock_predictor(wx.Frame):
         self.info_button_bar.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.show_about, id = ABT)
         self.info_button_bar.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, self.show_manual, id = MAN)
 
+    # Populates stock price data into the table
     def view_table(self):
         self.data.clear()
         try:

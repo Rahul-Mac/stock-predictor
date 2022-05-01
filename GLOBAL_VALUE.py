@@ -11,6 +11,8 @@ You should have received a copy of the GNU General Public License along with Sto
 If not, see <https://www.gnu.org/licenses/>.
 '''
 
+__author__ = "Rahul Mac"
+
 # This file contains all the global variables used in the code.
 
 FILE = ""   # Stores the name of the file 
