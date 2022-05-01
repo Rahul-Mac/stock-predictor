@@ -60,7 +60,7 @@ class stock_predictor(wx.Frame):
         s.Add(self.mygrid, 1, wx.EXPAND)
         self.SetSizer(s)
         self.statusBar = self.CreateStatusBar(style = wx.BORDER_NONE)
-        self.statusBar.SetStatusText("Welcome to Stock Predictor")
+        self.statusBar.SetStatusText("Welcome to Stock Predictor v2.0.0")
         self.Show(True)
         self.Maximize(True)
         self.mygrid.CreateGrid(0, 0)
