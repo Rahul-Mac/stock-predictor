@@ -31,6 +31,7 @@ from sklearn.metrics import accuracy_score
 from sklearn.svm import SVC
 import sklearn.utils._typedefs
 import sklearn.neighbors._partition_nodes
+import locale
 import manual
 
 INS = wx.Window.NewControlId()
@@ -45,6 +46,7 @@ MAN = wx.Window.NewControlId()
 class stock_predictor(wx.Frame):
     def __init__(self, *args, **kw):
         super(stock_predictor, self).__init__(*args, **kw)
+        locale.setlocale(locale.LC_ALL, 'C')
         self.SetTitle('Stock Predictor')
         self.ribbon = RB.RibbonBar(self, -1)
         self.icons()
@@ -107,11 +109,6 @@ class stock_predictor(wx.Frame):
         font = wx.Font(wx.FontInfo(20))
         self.acc.SetFont(font)
         self.acc.SetForegroundColour(wx.Colour(0, 0, 0))
-        '''sizer_panelsizer = wx.BoxSizer(wx.VERTICAL)
-        #sizer_panelsizer.AddStretchSpacer(1)
-        sizer_panelsizer.Add(self.acc, 0, wx.ALL|wx.EXPAND, 2)
-        #sizer_panelsizer.AddStretchSpacer(5)
-        self.acc_panel.SetSizer(sizer_panelsizer)'''
 
     # function that performs linear regression on the given stock data file.
     # Here, X i.e. moving average, is the independent variable
@@ -133,7 +130,7 @@ class stock_predictor(wx.Frame):
         model = LinearRegression().fit(X_train, y_train)
         pred = model.predict(X_test)
         acc = model.score(pred, y_test)
-        GLOBAL_VALUE.ACC = acc*100
+        GLOBAL_VALUE.ACC = "{:.2f}".format(float(acc*100))
         self.acc.SetLabel("Linear Regression = "+str(GLOBAL_VALUE.ACC) + "%")
         pred = pd.DataFrame(pred,index = y_test.index, columns = ['price'])
         plt.plot(y)
@@ -164,7 +161,7 @@ class stock_predictor(wx.Frame):
         pred = model.predict(X_test)
         pred = pred.reshape(-1, 1)
         acc = model.score(pred, y_test)
-        GLOBAL_VALUE.ACC = acc*100
+        GLOBAL_VALUE.ACC = "{:.2f}".format(float(acc*100))
         self.acc.SetLabel("Lasso Regression = "+str(GLOBAL_VALUE.ACC) + "%")
         pred = pd.DataFrame(pred,index = y_test.index, columns = ['price'])
         plt.plot(y)
@@ -178,8 +175,8 @@ class stock_predictor(wx.Frame):
     # Function for kNN
     # Here, the independent variable is ['Open-Close', 'High-Low']. 
     # The dependent variable stores the trading signal.
-    # If tomorrow’s price is greater than today’s price then we will store 1 (buy signal)
-    # and if it's lesser than today's price then we will store -1 (sell signal).
+    # If today’s price is lesser than the 500th day's price, we will store 1 (buy signal)
+    # else we will store -1 (sell signal).
     # The number of neighbors used is 10. Finally, we will provide
     # a chart of predicted returns vs actual returns.
     def k_nearest_neighbours(self):
@@ -198,7 +195,7 @@ class stock_predictor(wx.Frame):
         model = KNeighborsClassifier(n_neighbors=100).fit(X_train, y_train)
         df['pred'] = model.predict(X)
         acc = accuracy_score(y, df['pred'])
-        GLOBAL_VALUE.ACC = acc*100
+        GLOBAL_VALUE.ACC = "{:.2f}".format(float(acc*100))
         self.acc.SetLabel("K-Nearest Neighbours = "+str(GLOBAL_VALUE.ACC) + "%")
         df['ret'] = df['close'].pct_change()
         df['str'] = df['ret']*df['pred'].shift(500)
@@ -207,14 +204,14 @@ class stock_predictor(wx.Frame):
         df['ret'] = df['ret']*10
         df['str'] = df['str']*10
         plt.plot(df['ret'])
-        #df['str'] = df['str'].abs()
         plt.plot(df['str'])
         plt.xlabel('Date')
         plt.ylabel('Returns (%)')
         plt.legend(['Actual', 'Prediction'], loc = "upper left")
         plt.show()
 
-    # The SVM function takes the same values for X and y as kNN 
+    # The SVM function takes the same values for X and y as KNN
+    # The algorithm of this function is also similar that of KNN's
     def support_vector_machine(self):
         df = pd.read_csv(GLOBAL_VALUE.FILE)
         df = df.dropna()
@@ -231,7 +228,7 @@ class stock_predictor(wx.Frame):
         model = SVC().fit(X_train, y_train)
         df['pred'] = model.predict(X)
         acc = accuracy_score(y, df['pred'])
-        GLOBAL_VALUE.ACC = acc*100
+        GLOBAL_VALUE.ACC = "{:.2f}".format(float(acc*100))
         self.acc.SetLabel("Support Vector Machine = "+str(GLOBAL_VALUE.ACC) + "%")
         df['ret'] = df['close'].pct_change()
         df['str'] = df['ret']*df['pred'].shift(500)
@@ -240,7 +237,6 @@ class stock_predictor(wx.Frame):
         df['ret'] = df['ret']*10
         df['str'] = df['str']*10
         plt.plot(df['ret'])
-        #df['str'] = df['str'].abs()
         plt.plot(df['str'])
         plt.xlabel('Date')
         plt.ylabel('Returns (%)')
