@@ -181,8 +181,8 @@ class stock_predictor(wx.Frame):
     # The dependent variable stores the trading signal.
     # If today’s price is lesser than the 500th day's price, we will store 1 (buy signal)
     # else we will store -1 (sell signal).
-    # The number of neighbors used is 10. Finally, we will provide
-    # a chart of predicted returns vs actual returns.
+    # The number of neighbours used is 100. Finally, we will provide
+    # a chart of predicted returns versus actual returns.
     def k_nearest_neighbours(self):
         df = pd.read_csv(GLOBAL_VALUE.FILE)
         df = df.dropna()
@@ -246,6 +246,8 @@ class stock_predictor(wx.Frame):
         plt.ylabel('Returns (%)')
         plt.legend(['Actual', 'Prediction'], loc = "upper left")
         plt.show()
+
+    # The four functions created below are used to handle exceptions for the ML models
 
     def lin_fun(self, e):
         try:
