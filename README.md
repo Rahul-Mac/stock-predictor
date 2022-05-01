@@ -14,5 +14,5 @@ This software is used predict stock prices using various ML models.
   ```
 * Run
   ```
-    python main.py
+    python3 main.py
   ```
